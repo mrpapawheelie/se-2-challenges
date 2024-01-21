@@ -5,42 +5,95 @@ import { Spinner } from "~~/components/Spinner";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
+const bNum = 5127527n;
+
 const Events: NextPage = () => {
+  const { data: ApprovalEvents, isLoading: isApprovalEventsLoading } = useScaffoldEventHistory({
+    contractName: "Balloons",
+    eventName: "Approval",
+    fromBlock: bNum,
+  });
   const { data: EthToTokenEvents, isLoading: isEthToTokenEventsLoading } = useScaffoldEventHistory({
     contractName: "DEX",
     eventName: "EthToTokenSwap",
-    fromBlock: 0n,
+    fromBlock: bNum,
   });
 
   const { data: tokenToEthEvents, isLoading: isTokenToEthEventsLoading } = useScaffoldEventHistory({
     contractName: "DEX",
     eventName: "TokenToEthSwap",
-    fromBlock: 0n,
+    fromBlock: bNum,
   });
 
   const { data: liquidityProvidedEvents, isLoading: isLiquidityProvidedEventsLoading } = useScaffoldEventHistory({
     contractName: "DEX",
     eventName: "LiquidityProvided",
-    fromBlock: 0n,
+    fromBlock: bNum,
   });
 
   const { data: liquidityRemovedEvents, isLoading: isLiquidityRemovedEventsLoading } = useScaffoldEventHistory({
     contractName: "DEX",
     eventName: "LiquidityRemoved",
-    fromBlock: 0n,
+    fromBlock: bNum,
   });
 
   return (
     <>
       <MetaHeader />
       <div className="flex items-center flex-col flex-grow pt-10">
+        {isApprovalEventsLoading ? (
+          <div className="flex justify-center items-center mt-10">
+            <Spinner width="75" height="75" />
+            </div>
+            ) : (
+              <div>
+                <div className="text-center mb-4">
+                  <span className="block text-2xl font-bold">Approval Events</span>
+                  </div>
+                  <div className="overflow-x-auto shadow-lg">
+                    <table className="table table-zebra w-full">
+                      <thead>
+                        <tr>
+                          <th className="bg-primary">Address</th>
+                          <th className="bg-primary">Spender</th>
+                          <th className="bg-primary">Amount</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            {!ApprovalEvents || ApprovalEvents.length === 0 ? (
+                              <tr>
+                                <td colSpan={3} className="text-center">
+                                  No events found
+                                  </td>
+                                  </tr>
+                                  ) : (
+                                    ApprovalEvents?.map((event, index) => {
+                                      return (
+                                        <tr key={index}>
+                                          <td className="text-center">
+                                            <Address address={event.args.owner} />
+                                            </td>
+                                            <td className="text-center">
+                                              <Address address={event.args.spender} />
+                                              </td>
+                                              <td>{parseFloat(formatEther(event.args.value)).toFixed(4)}</td>
+                                              </tr>
+                                            );
+                                          })
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              )}
+
         {isEthToTokenEventsLoading ? (
           <div className="flex justify-center items-center mt-10">
             <Spinner width="75" height="75" />
           </div>
         ) : (
           <div>
-            <div className="text-center mb-4">
+            <div className="text-center mb-4 pt-10">
               <span className="block text-2xl font-bold">ETH To Balloons Events</span>
             </div>
             <div className="overflow-x-auto shadow-lg">
